@@ -1,0 +1,9 @@
+{
+	"name": "Soep Browser",
+	"main": "browser/index.html",
+	"window": {
+		"icon": "browser/icons/app.png",
+		"min_width": 400,
+		"min_height": 400
+	}
+}

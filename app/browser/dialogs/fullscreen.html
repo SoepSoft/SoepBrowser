@@ -1,0 +1,15 @@
+<!doctype html>
+<body style="background-color:#0000ff; color:#ffffff; user-select: none;">
+<div style="display:flex; height:90vh; width:90vw; align-items:center; justify-content:center; margin:0px; flex-direction:column; margin:auto;">
+<h2 id="URLText">A page</h2>
+<h1>is in fullscreen</h1>
+</div>
+</body>
+
+<script>
+document.getElementById("URLText").textContent = new URLSearchParams(window.location.search).get("url");
+
+setTimeout(function(){
+	window.close();
+}, 3000);
+</script>

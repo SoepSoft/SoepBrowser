@@ -1,0 +1,179 @@
+<!doctype html>
+<!-- had to swich to one main <style> for :hover to work, to me this is more confusing then using style="", is it just me? -->
+<style>
+body {
+	background-color: #0059ff;
+	overflow: hidden;
+	user-select: none;
+	font-family: system-ui, sans-serif;
+}
+.tab {
+	border: 5px outset Blue;
+	border-radius: 10px;
+	background-color: blue;
+	display: flex;
+}
+.tabButton {
+	border: none;
+	border-radius: 10px;
+}
+.tabButton.active {
+	background-color: orange;
+}
+.tabButton.active:hover {
+	background-color: #c99700;
+}
+.tabButton.inActive {
+	background-color: lightBlue;
+}
+.tabButton.inActive:hover {
+	background-color: #3483eb;
+}
+.closeButton {
+	border: none;
+	border-radius: 5px;
+	background-color: red;
+}
+.closeButton:hover {
+	background-color: #d40000;
+}
+.newTabButton {
+	width: 40px;
+	border: 5px outset Blue;
+	border-radius: 10px;
+	background-color: lightGreen;
+	font-size:20px;
+}
+.newTabButton:hover {
+	background-color: #0cbf06;
+}
+.ForwardBackwardButtons {
+	height: 30px;
+	width: 40px;
+	border: 5px outset Blue;
+	border-radius: 10px;
+	background-color: #0ac2ff;
+	margin: 3px;
+}
+.ForwardBackwardButtons:hover {
+	background-color: #049dcc;
+}
+.textInput {
+	height: 20px;
+	font-size: 15px;
+	border: 5px outset Blue;
+	border-radius: 10px;
+	background-color: #0ac2ff;
+}
+.textInput:hover {
+	background-color: #049dcc;
+}
+.textInput:focus {
+	background-color: #b7e8f7;
+}
+.settingsButton {
+	height: 30px;
+	width: 30px;
+	border: 5px outset Blue;
+	border-radius: 10px;
+	background-color: #0ac2ff;
+	padding: 2px;
+	vertical-align: top;
+	margin: 3px;
+}
+.settingsButton:hover {
+	background-color: #049dcc;
+}
+.settingsTabs {
+	margin: 2px;
+	height: 40px;
+	border: 5px outset #0ac2ff;
+	border-radius: 10px;
+	background-color: #0ac2ff;
+}
+.settingsTabs:hover {
+	background-color: #049dcc;
+	border: 5px outset #049dcc;
+}
+.settingsCloseButton {
+	margin: 2px;
+	margin-left: auto;
+	margin-right: 0;
+	height: 40px;
+	width: 40px;
+	border: 5px outset red;
+	border-radius: 10px;
+	background-color: red;
+}
+.settingsCloseButton:hover {
+	background-color: #d40000;
+	border: 5px outset #d40000;
+}
+.settingsDefaultButton {
+	margin: 2px;
+	height: 40px;
+	border: 5px outset #0ac2ff;
+	border-radius: 10px;
+	background-color: #0ac2ff;
+}
+.settingsDefaultButton:hover {
+	background-color: #049dcc;
+	border: 5px outset #049dcc;
+}
+.radioButtons {
+	transform: scale(2);
+	margin-right: 20px;
+}
+</style>
+<body>
+<div id="popupBg" style="display: none; position: absolute; top: 0; left: 0; width: 100vw; height:100vh; background-color:#000000; opacity: 50%;"></div>
+<div id="tabBar" style="display:flex; gap:5px; height: 56px; overflow-x: auto; overflow-y: hidden;"></div>
+<div style="display: flex;"> <!-- control bar -->
+<button class="ForwardBackwardButtons" onclick="webviews[currentTab-1].back();"><-</button>
+<button class="ForwardBackwardButtons" onclick="webviews[currentTab-1].forward();">-></button>
+<input class="textInput" style="flex: 1; min-width: 0; margin: 3px;" type="text" id="URLBar">
+<button class="settingsButton" onclick="settings('open');"><img src="icons/settings.png" style="width: 16px; height: 16px; display: block;"></button>
+</div>
+<div style="margin:0; display:flex; flex-direction:column; align-items:center;" id="page"></div>
+
+<dialog id="settings" style="width: 90%; height: 90%; border: 10px outset #0339fc; border-radius: 10px; background-color: #0339fc; font-weight: bold;" popover>
+<div style="display: flex">
+<button class="settingsTabs" onclick="settings('searchEngine');">Search engine</button>
+<!-- <button class="settingsTabs" onclick="settings('permissions');">Permissions</button> -->
+<button class="settingsTabs" onclick="settings('about');">About</button>
+<button class="settingsCloseButton" onclick="settings('close');">X</button>
+</div>
+
+<div id="settingsSearchEngine" style="display:block; width:100%; color: #ffffff;">
+<center><h1>Search Engine</h1></center>
+<hr>
+<h2><label><input id="settingsStartURLRadio1" type="radio" name="settingsStartURLRadios" class="radioButtons">Google</label></h2>
+<h2><label><input id="settingsStartURLRadio2" type="radio" name="settingsStartURLRadios" class="radioButtons">Bing</label></h2>
+<h2><label><input id="settingsStartURLRadio3" type="radio" name="settingsStartURLRadios" class="radioButtons">Yahoo</label></h2>
+<h2><label><input id="settingsStartURLRadio4" type="radio" name="settingsStartURLRadios" class="radioButtons">DuckDuckGo</label></h2>
+<h2><label><input id="settingsStartURLRadio5" type="radio" name="settingsStartURLRadios" class="radioButtons">Ecosia</label></h2>
+<h2><label><input id="settingsStartURLRadio6" type="radio" name="settingsStartURLRadios" class="radioButtons">Other</label><input class="textInput" style="margin-left: 20px; width: 30%" type="text" id="settingsStartURLOtherInput"></h2>
+</div>
+
+<div id="settingsPermissions" style="display:none; width:100%; color: #ffffff;"> <!-- currently unused -->
+<center><h1>Permissions</h1></center>
+<hr>
+<span style="margin-left: 10px; margin-right: 20px; font-size: 20px;">D</span><span style="margin-right: 20px; font-size: 20px;">?</span><span style="font-size: 20px;">A</span><span style="margin-left: 15%; font-size: 20px;">(D = deny | ? = ask | A = allow)</span>
+<h2><label><input id="settingsPermissionsFu1" type="radio" name="settingsPermissionsFu" style="margin: 10px;"><input id="settingsPermissionsFu2" type="radio" name="settingsPermissionsFu" style="margin: 10px;"><input id="settingsPermissionsFu3" type="radio" name="settingsPermissionsFu" style="margin: 10px;">Fullscreen</label></h2>
+<!-- <h2><input id="settingsPermissionsDo1" type="radio" name="settingsPermissionsDo" style="margin: 10px;"><input id="settingsPermissionsDo2" type="radio" name="settingsPermissionsDo" style="margin: 10px;"><input id="settingsPermissionsDo2" type="radio" name="settingsPermissionsDo" style="margin: 10px;"><label>Download</label></h2> -->
+</div>
+
+<div id="settingsAbout" style="display:block; width:100%; color: #ffffff;">
+<center><h1>About</h1></center>
+<hr>
+<center><h1 style="margin: 2px;">Soep Browser</h1><h3 style="margin: 2px;">Version 1.0</h3></center>
+<center><img src="icons/app.png" style="width: 20%;" draggable="false" onclick="alert('Thank you for using our software!');"></center>
+<center><h2 style="margin: 0px;">A simple open-source browser.</h2></center>
+<center><h3>By SoepSoft</h3></center>
+<!-- <center><button onclick="SetDefaultBrowser();" style="margin: 2px; height: 40px; border: 5px outset #0ac2ff; border-radius: 10px; background-color: #0ac2ff;">Set default browser</button></center> -->
+<center><button class="settingsDefaultButton" onclick="resetBrowser();">Reset browser</button></center>
+</div>
+</dialog>
+
+<script type="text/javascript" src="main.js"></script>
+</body>
