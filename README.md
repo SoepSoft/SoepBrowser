@@ -17,7 +17,7 @@ A simple open-source browser built with NW.js.
 - Go through the install wizard
 - Done!
 
-## Development
+## Development Setup
 
 A version of NW.js is required to test the browser. Download NW.js at:  [https://nwjs.io](https://nwjs.io)
 
@@ -25,11 +25,9 @@ Download the folder `app`
 
 Put the contents of the downloaded folder into the root of the NW.js installation.
 
-Inside the `browser` folder are all the frontend files.
-
 To test run `nw.exe`
 
-## To do
+## TODO
 
 - Better icons
 - Bookmarks
