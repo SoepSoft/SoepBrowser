@@ -1,8 +1,8 @@
-# SoepBrowser
+# Soep Browser
 
 A simple open-source browser built with NW.js.
 
-![SoepBrowser showing Google homepage](screenshot.png)
+![Soep Browser showing Google homepage](screenshot.png)
 
 ## Features
 
@@ -19,7 +19,12 @@ A simple open-source browser built with NW.js.
 
 ## Development Setup
 
-A version of NW.js is required to test the browser. Download NW.js at:  [https://nwjs.io](https://nwjs.io)
+A version of NW.js is required to test the browser.
+
+NW.js version 0.113.0 is recommended.
+Note: NW.js 0.114.0 causes the button hover effect to render incorrectly.
+
+Download NW.js at:  [https://nwjs.io](https://nwjs.io)
 
 Download the folder `app`
 
