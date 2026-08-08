@@ -415,6 +415,7 @@ function setDefaultIfEmpty() { //if a setting hasn't been saved e.g. first time 
 
 function resetBrowser() {
 	if (confirm("Are you sure? All the settings will be reset and the browser will close.")) {
+		chrome.downloads.erase({});
 		localStorage.clear();
 		window.nw.App.clearCache();
 		window.close();
