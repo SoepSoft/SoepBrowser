@@ -1,22 +1,34 @@
 # Soep Browser
 
-A simple open-source browser built with NW.js.
+An easily modifiable open-source browser built with NW.js.
 
 ![Soep Browser showing Google homepage](screenshot.png)
 
 ## Features
 
-- Simple
-- Easily customizable
+- No AI integration
 - No data collection
+- Easily modifiable
+- Turn off features you don't use
 
 ## Installation
 
+### Windows
 - Go to releases
-- Download and run **"Soep Browser installer.exe"**
+- Download and run **"Soep_Browser-x86_64-setup.exe"**
 - Go through the install wizard
 - Done!
 
+### Linux
+- Go to releases
+- Download **"Soep_Browser-x86_64.AppImage"**
+- Right click the downloaded file
+- Click 'properties'
+- Go to tab 'Permissions'
+- Check 'Allow this file to run as a program'
+- Click 'Close'
+- Now you can double-click the file to open Soep Browser
+  
 ## Development Setup
 
 A version of NW.js is required to test the browser.
@@ -24,16 +36,17 @@ A version of NW.js is required to test the browser.
 NW.js version 0.113.0 is recommended.
 Note: NW.js 0.114.0 causes the button hover effect to render incorrectly.
 
-Download NW.js at:  [https://nwjs.io](https://nwjs.io)
+- Download NW.js at:  [https://nwjs.io](https://nwjs.io)
 
-Download the folder `app`
+- Extract the NW.js archive
 
-Put the contents of the downloaded folder into the root of the NW.js installation.
+- Download the folder `app`
 
-To test run `nw.exe`
+- Put the contents of the downloaded folder into the root of the NW.js installation.
+
+- To test on Windows run `nw.exe`, on Linux `nw`
 
 ## TODO
 
 - Better icons
-- Bookmarks
-- Save last open tabs option
+- Run at startup feature
