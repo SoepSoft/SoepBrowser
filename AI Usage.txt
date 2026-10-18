@@ -1,0 +1,9 @@
+How We Use AI
+
+We use AI for the following purposes:
+
+- Spelling corrections: To find and correct spelling mistakes in our text.
+- Small parts of code: When we don't know how to implement something, we sometimes use AI for help. We try to remember how it works so we can do it without AI next time.
+- Finding bugs: Sometimes we ask AI to check our code for bugs. However, it doesn't always find actual bugs.
+
+*AI was also used to correct spelling mistakes in this file. If a human would like to help with one or more of these tasks in exchange for credit (no payment), feel free to contact us at soepsoft@gmail.com.
