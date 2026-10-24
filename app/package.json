@@ -1,9 +1,10 @@
 {
-	"name": "Soep Browser",
-	"main": "browser/index.html",
-	"window": {
-		"icon": "browser/icons/app.png",
-		"min_width": 400,
-		"min_height": 400
-	}
+    "name": "Soep Browser",
+    "version": "1.2.0",
+    "main": "browser/index.html",
+    "window": {
+        "icon": "browser/icons/app.png",
+        "min_width": 400,
+        "min_height": 400
+        }
 }

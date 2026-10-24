@@ -1,11 +1,12 @@
 <!doctype html>
+<meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="index.css">
 <body>
 
 <div id="tabBar" style="display:flex; gap:5px; height: 56px; overflow-x: auto; overflow-y: hidden;"></div>
 <div style="display: flex;"> <!-- control bar -->
-<button class="ForwardBackwardButtons" onclick="page.children[currentTab-1].back();" title="Back"><-</button>
-<button class="ForwardBackwardButtons" onclick="page.children[currentTab-1].forward();" title="Forward">-></button>
+<button class="ForwardBackwardButtons" onclick="if (page.children.length !== 0) {page.children[currentTab-1].back();}" title="Back"><img src="icons/forwardback.png" style="width: 100%; margin: auto; display: block;"></button>
+<button class="ForwardBackwardButtons" onclick="if (page.children.length !== 0) {page.children[currentTab-1].forward();}" title="Forward"><img src="icons/forwardback.png" style="width: 100%; margin: auto; display: block; transform: scaleX(-1);"></button>
 <input class="textInput" style="flex: 1; min-width: 0; margin: 3px;" type="text" id="URLBar" title="URL bar">
 <div class="bookmarksDropdown">
 <button class="controlBarMenusButtons" id="bookmarksButton" onclick="toggleBookmarksMenu()" title="Bookmarks"><img src="icons/bookmarks.png" style="margin: auto; height: 16px; display: block;"></button>
@@ -13,60 +14,63 @@
 </div>
 </div>
 <button class="controlBarMenusButtons" id="downloadsButton" onclick="downloads('open');" title="Downloads"><img src="icons/downloads.png" style="margin: auto; height: 16px; display: block;"></button>
-<button class="controlBarMenusButtons" onclick="settings('open');" title="Settings"><img src="icons/settings.png" style="width: 16px; height: 16px; display: block;"></button>
+<button class="controlBarMenusButtons" id="settingsButton" onclick="settings('open');" title="Settings"><img src="icons/settings.png" style="width: 16px; height: 16px; display: block;"></button>
 </div>
-
 <div style="margin:0; display:flex; flex-direction:column; align-items:center;" id="page"></div>
 
 <div id="popupBg" style="display: none; position: absolute; top: 0; left: 0; width: 100vw; height:100vh; background-color:#000000; opacity: 50%;"></div>
 
 <dialog id="settingsDialog" style="width: 90%; height: 90%; border: 10px outset #0339fc; border-radius: 10px; background-color: #0339fc;" popover>
 <div style="display: flex">
-<button class="settingsTabs" onclick="settings('searchEngine');">Search engine</button>
-<button class="settingsTabs" onclick="settings('features');">Features</button>
-<button class="settingsTabs" onclick="settings('about');">About</button>
-<button class="menuCloseButton" onclick="settings('close');" title="Apply and close">X</button>
+<button class="settingsDefaultButton" onclick="settings('searchEngine');" title="Set the start page">Start page</button>
+<button class="settingsDefaultButton" onclick="settings('features');" title="Enable or disable features">Features</button>
+<button class="settingsDefaultButton" onclick="settings('about');" title="About Soep Browser">About</button>
+<button class="menuCloseButton" onclick="settings('close-discard');" title="Discard and close">X</button>
+<button class="menuCheckButton" onclick="settings('close-apply');" title="Apply and close">✓</button>
 </div>
 
-<div id="settingsSearchEngine" style="display:block; width:100%; color: #ffffff;">
-<center><h1>Search engine</h1></center>
+<div id="settingsStartPage" style="display:block; width:100%; color: #ffffff; overflow-y: auto;">
+<center><h1>Start page</h1></center>
 <hr>
-<h2><label><input id="settingsStartURLRadio1" type="radio" name="settingsStartURLRadios" class="radioButtons">Google</label></h2>
-<h2><label><input id="settingsStartURLRadio2" type="radio" name="settingsStartURLRadios" class="radioButtons">Bing</label></h2>
-<h2><label><input id="settingsStartURLRadio3" type="radio" name="settingsStartURLRadios" class="radioButtons">Yahoo</label></h2>
-<h2><label><input id="settingsStartURLRadio4" type="radio" name="settingsStartURLRadios" class="radioButtons">DuckDuckGo</label></h2>
-<h2><label><input id="settingsStartURLRadio5" type="radio" name="settingsStartURLRadios" class="radioButtons">Ecosia</label></h2>
-<h2><label><input id="settingsStartURLRadio6" type="radio" name="settingsStartURLRadios" class="radioButtons">Other</label><input class="textInput" style="margin-left: 20px; width: 30%" type="text" id="settingsStartURLOtherInput" title="Other start URL"></h2>
+<h2><label title="google.com"><input id="settingsStartPageRadioGoogle" type="radio" name="settingsStartPageRadios" class="radioButtons">Google</label></h2>
+<h2><label title="bing.com"><input id="settingsStartPageRadioBing" type="radio" name="settingsStartPageRadios" class="radioButtons">Bing</label></h2>
+<h2><label title="search.yahoo.com"><input id="settingsStartPageRadioYahoo" type="radio" name="settingsStartPageRadios" class="radioButtons">Yahoo</label></h2>
+<h2><label title="start.duckduckgo.com"><input id="settingsStartPageRadioDuckduckgo" type="radio" name="settingsStartPageRadios" class="radioButtons">DuckDuckGo</label><label style="margin-left: 20px;" title="noai.duckduckgo.com"><input type="checkbox" class="checkBoxes" id="settingsStartPageCheckboxDuckduckgoNoAI">No AI</label></h2>
+<h2><label title="ecosia.org"><input id="settingsStartPageRadioEcosia" type="radio" name="settingsStartPageRadios" class="radioButtons">Ecosia</label></h2>
+<h2><label><input id="settingsStartPageRadioOther" type="radio" name="settingsStartPageRadios" class="radioButtons">Other</label><input class="textInput" style="margin-left: 20px; width: 30%" type="text" id="settingsStartURLOtherInput" title="Other start URL"></h2>
 </div>
 
-<div id="settingsFeatures" style="display:block; width:100%; color: #ffffff;">
+<div id="settingsFeatures" style="display:block; width:100%; color: #ffffff; overflow-y: auto; padding: 0px;">
 <center><h1>Features</h1></center>
 <hr>
-<h2><label title="Be able to have multble websites open at once."><input id="settingsFeaturesCheckboxTabs" type="checkbox" class="checkBoxes">Tabs</label></h2>
+<h2><label title="Be able to have multiple websites open at once."><input id="settingsFeaturesCheckboxTabs" type="checkbox" class="checkBoxes">Tabs</label></h2>
 <h2><label title="Allow websites to create tabs. (turning this off may break some websites)"><input id="settingsFeaturesCheckboxAllowwebsitestocreatetabs" type="checkbox" class="checkBoxes">Allow websites to create tabs.</label></h2>
-<h2><label title="Reopens tabs that were open when the browser was last closed so you can continu were you were, the tabs do reload."><input id="settingsFeaturesCheckboxRestoreprevioussessiononstartup" type="checkbox" class="checkBoxes">Restore previous session on startup</label></h2>
+<h2><label title="Reopens tabs that were open when the browser was last closed so you can continue where you left off, the tabs will reload."><input id="settingsFeaturesCheckboxRestoreprevioussessiononstartup" type="checkbox" class="checkBoxes">Restore previous session on startup</label></h2>
 <h2><label title="Allow downloading."><input id="settingsFeaturesCheckboxDownload" type="checkbox" class="checkBoxes">Download</label></h2>
 <h2><label title="Show downloads button in control bar."><input id="settingsFeaturesCheckboxDownloadmanager" type="checkbox" class="checkBoxes" onclick="if (!document.getElementById('settingsFeaturesCheckboxDownloadmanager').checked) {document.getElementById('settingsFeaturesCheckboxDownloadhistory').checked = false;};" >Download manager</label></h2>
-<h2><label title="keep download history"><input id="settingsFeaturesCheckboxDownloadhistory" type="checkbox" class="checkBoxes">Download history</label></h2>
+<h2><label title="Keep download history."><input id="settingsFeaturesCheckboxDownloadhistory" type="checkbox" class="checkBoxes">Download history</label></h2>
 <h2><label title="Show bookmarks icon in control bar."><input id="settingsFeaturesCheckboxBookmarks" type="checkbox" class="checkBoxes" onclick="if (!document.getElementById('settingsFeaturesCheckboxBookmarks').checked) {document.getElementById('settingsFeaturesCheckboxRestorepreviousbookmarks').checked = false;};">Bookmarks</label></h2>
 <h2><label title="Keep bookmarks even when the browser restarts."><input id="settingsFeaturesCheckboxRestorepreviousbookmarks" type="checkbox" class="checkBoxes">Restore previous bookmarks on startup</label></h2>
+<h2><label title="Start SoepBrowser when the computer starts."><input id="settingsFeaturesCheckboxStartwithsystem" type="checkbox" class="checkBoxes">Start with system</label></h2>
+<h2><label title="Show the current tab name in the window title."><input id="settingsFeaturesCheckboxWindowtitletotabname" type="checkbox" class="checkBoxes">Current tab name in window title</label></h2>
+<h2><label title="For use in kiosks, etc."><input id="settingsFeaturesCheckboxKioskmode" type="checkbox" class="checkBoxes" onclick="kioskmodeCheckboxCode();">Kiosk mode</label><button class="settingsDefaultButton" onclick="editKioskPassword();" title="Edit password to open settings when in kiosk mode" style="margin-left: 5px;">Edit password</button><button class="settingsDefaultButton" onclick="if (localStorage.getItem('kioskPassword') == null) {alert('No password set.')} else {alert(localStorage.getItem('kioskPassword'));};" title="Show the currently saved kiosk password">Show saved password</button></h2>
 <h3 style="margin-bottom: 0px;">Advanced</h3>
 <hr>
-<h2><label title="Allow websites to create windows. (this may be used mallichusley)"><input id="settingsFeaturesCheckboxAllowpopups" type="checkbox" class="checkBoxes">Allow popups</label></h2>
-<h2><label title="This feature adds code to website to fix issues fer example that the escape key exits fullscreen."><input id="settingsFeaturesCheckboxInjectfeaturestopage" type="checkbox" class="checkBoxes">Inject features to page</label></h2>
+<h2><label title="Allow websites to create windows. (this may be used maliciously)"><input id="settingsFeaturesCheckboxAllowpopups" type="checkbox" class="checkBoxes">Allow pop-ups</label></h2>
+<h2><label title="This feature adds code to websites to fix issues for example that the Escape key actually exits fullscreen."><input id="settingsFeaturesCheckboxInjectfeaturestopage" type="checkbox" class="checkBoxes">Inject fixes to page</label></h2>
 </div>
 
-<div id="settingsAbout" style="display:block; width:100%; color: #ffffff;">
+<div id="settingsAbout" style="display:block; width:100%; color: #ffffff; overflow-y: auto;">
 <center><h1>About</h1></center>
 <hr>
-<center><h1 style="margin: 2px;">Soep Browser</h1><h3 style="margin: 2px;">Version 1.1.0</h3><h3 style="margin: 2px;" id="NWJSVer"></h3></center>
-<center><img src="icons/app.png" style="width: 20%;" draggable="false" onclick="alert('mmmmm soup');"></center>
-<center><h2 style="margin: 0px;">A simple open-source browser.</h2></center>
+<center><h1 style="margin: 2px;">Soep Browser</h1><h3 style="margin: 2px;" id="settingsVersionText">Error</h3><h3 style="margin: 2px;" id="NWJSVer">Error</h3></center>
+<center><img src="icons/app.png" style="width: 20%;" draggable="false" onclick="alert(':)');"></center>
+<center><h2 style="margin: 0px;">An easily modifiable open-source browser built with NW.js.</h2></center>
 <center><h3 style="margin: 10px;">By SoepSoft</h3></center>
 <!-- <center><button onclick="SetDefaultBrowser();" style="margin: 2px; height: 40px; border: 5px outset #0ac2ff; border-radius: 10px; background-color: #0ac2ff;">Set default browser</button></center> -->
-<center><button class="settingsDefaultButton" onclick="resetBrowser();">Reset browser</button></center>
+<center><button title="Reset Soep Browser." class="settingsDefaultButton" onclick="resetBrowser();">Reset browser</button></center>
 <br>
-<center><button class="settingsDefaultButton" onclick="settings('close'); newTab('https://github.com/SoepSoft/SoepBrowser');">View on GitHub</button></center>
+<center><button class="settingsDefaultButton" onclick="settings('close-discard'); newTab('https://github.com/SoepSoft/SoepBrowser');" title="View the Soep Browser Github page">View on GitHub</button></center>
 </div>
 </dialog>
 
@@ -75,7 +79,7 @@
 <button class="settingsDefaultButton" onclick="clearDownloads();">Clear download history</button>
 <button class="menuCloseButton" onclick="downloads('close');" title="Close">X</button>
 </div>
-<div style="color: #ffffff;">
+<div style="color: #ffffff; overflow-y: auto;">
 <center><h1>Downloads</h1></center>
 <hr>
 <div id="downloadingList" style="display: flex;  align-items: center; width: 100%; flex-direction: column;">
@@ -85,6 +89,10 @@
 </div>
 </div>
 </dialog>
+
+<div id="waitDownloadHistorySaveDatabase" style="display: none; position: fixed; left: 50vw; top: 50vh; transform: translate(-50%, -50%); width: 500px; height: 50px; background-color: #0000ff; align-items: center; justify-content: center;">
+<span>Waiting for cleared download history to save to database...</span>
+</div>
 
 <script type="text/javascript" src="main.js"></script>
 </body>
