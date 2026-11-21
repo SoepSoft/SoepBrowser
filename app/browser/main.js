@@ -1,5 +1,5 @@
 window.onerror = function (message, source, lineno, colno, error) { //error alert
-    alert('An error occurred you may restart the browser.' + '\n' + lineno + "," + colno + " " + error);
+    alert('An error occurred. You may restart or reset the browser.' + '\n' + lineno + "," + colno + " " + error);
 };
 
 var win = nw.Window.get();
@@ -36,7 +36,9 @@ if (localStorage.getItem("featuresRestoreprevioussessiononstartup") == 'true') {
 		for (let I = 0; I < page.children.length; I++) {
 			addWebViewEventListeners(page.children[I]);
 		};
-		switchTab(1, true); //make sure tab and webview are in sync
+		if (tabs.length !== 0) {
+			switchTab(1, true); //make sure tab and webview are in sync
+		}
 	}
 } else {
 	newTab();
@@ -89,7 +91,7 @@ function updateTabs(option) {
 			tabButton.title = 'Rename tab';
 		} else {
 			tabButton.classList.add("inActive");
-			tabButton.title = 'Switch tab';
+			tabButton.title = 'Switch to tab';
 		}
 		tab.appendChild(tabButton);
 
@@ -162,6 +164,7 @@ function addWebViewEventListeners(webview) {
 			}
 		}
 	});
+
 	webview.addEventListener('loadstop', () => { //tab naming
 		const tabData = tabs[Array.from(page.children).indexOf(webview)];
 		if (!tabData.nameEdited) {
@@ -180,15 +183,23 @@ function addWebViewEventListeners(webview) {
 			webview.executeScript({
 				code: `
 					document.addEventListener('keydown', (event) => {
-						if (document.fullscreen) {
+						if (document.fullscreenElement) {
 							if (event.key == 'Escape' || event.key == 'F11') {
 								document.exitFullscreen();
 							}
 						}
-						if (event.ctrlKey && event.key == '0') {
-							document.body.style.zoom = '100%';
+						//if (event.ctrlKey && event.key == '0') {
+						//	document.body.style.zoom = '100%';
+						//}
+					});
+					document.addEventListener('fullscreenchange', () => {
+						if (!document.fullscreenElement) {
+						console.debug('SOEPBROWSER: leftFullscreen');
 						}
 					});
+					document.addEventListener('mousedown', (event) => {
+						console.debug('SOEPBROWSER: mousedown');
+					})
 					console.log('Injected Soep Browser fixes.');
 				`
 			});
@@ -207,6 +218,20 @@ function addWebViewEventListeners(webview) {
 		}
 		if (e.windowOpenDisposition == 'new_popup' && localStorage.getItem('featuresAllowpopups') == 'true') {
 			window.open(e.targetUrl, e.name, "height=" + e.initialHeight + ",width=" + e.initialWidth);
+		}
+	});
+
+	webview.addEventListener('consolemessage', (e) => { //Communication from webpage to browser
+		if (e.message.startsWith('SOEPBROWSER:')) {
+			if (e.message.includes('leftFullscreen')) {
+				updatePageHeight();
+				return;
+			}
+			if (e.message.includes('mousedown')) {
+				bookmarksMenu.style.display = 'none';
+				return;
+			}
+			console.warn('Message from page is not recognized.');
 		}
 	});
 }
@@ -282,7 +307,7 @@ function settings(action) {
 				return;
 			}
 			if (enteredPassword !== localStorage.getItem('kioskPassword')) {
-				alert('Entered password is incorrect.');
+				alert('The entered password is incorrect.');
 				return;
 			}
 		}
@@ -393,10 +418,10 @@ function settingsApply() { //save settings to local storage
 function settingsGet() { //get settings from local storage.
 	if (process.platform !== 'win32') { //
 		document.getElementById("settingsFeaturesCheckboxStartwithsystem").disabled = true;
-		document.getElementById("settingsFeaturesCheckboxStartwithsystem").title = 'Currently not availble for this platform.';
+		document.getElementById("settingsFeaturesCheckboxStartwithsystem").title = 'Currently not available for this platform.';
 		
 		document.getElementById("settingsFeaturesCheckboxKioskmode").disabled = true;
-		document.getElementById("settingsFeaturesCheckboxKioskmode").title = 'Currently not availble for this platform.';
+		document.getElementById("settingsFeaturesCheckboxKioskmode").title = 'Currently not available for this platform.';
 	}
 	if (localStorage.getItem('duckduckgoNoAIcheckbox') == 'true') {
 		document.getElementById("settingsStartPageCheckboxDuckduckgoNoAI").checked = true;
@@ -485,6 +510,13 @@ function settingsGet() { //get settings from local storage.
 	} else {
 		document.getElementById("settingsFeaturesCheckboxKioskmode").checked = false;
 	}
+	if (localStorage.getItem('kioskPassword') == null) { //Show settingsEditKioskPWDbuton if a kiosk password is set.
+		document.getElementById('settingsEditKioskPWDbuton').style.display = 'none';
+	} else {
+		document.getElementById('settingsEditKioskPWDbuton').style.display = 'inline';
+	}
+	newKioskPWD = null; //Remove the going to be applied kiosk password.
+	
 	if (localStorage.getItem('featuresAllowpopups') == 'true') {
 		document.getElementById("settingsFeaturesCheckboxAllowpopups").checked = true;
 	} else {
@@ -624,7 +656,7 @@ async function getDownloads() { //Get downloads and show in downloads menu
 
 			let fileSize = document.createElement('h3');
 			fileSize.style.margin = '0px';
-			fileSize.innerText = (downloads[I].fileSize / 1048576).toFixed(10) + 'MB';
+			fileSize.innerText = (downloads[I].fileSize / 1048576).toFixed(3) + 'MB';
 			downloadDisplay.appendChild(fileSize);
 
 			document.getElementById('downloadsList').appendChild(downloadDisplay);
@@ -683,7 +715,7 @@ async function getDownloads() { //Get downloads and show in downloads menu
 
 async function updateActiveDownloads() {
 	const inProgressDownloads = await chrome.downloads.search({state: "in_progress", orderBy: ["-startTime"]});
-	if (localStorage.getItem('featuresDownloadhistory') !== 'true' && inProgressDownloads.length == 0) { //If download history is disabled and all downlads are finished clear download history.
+	if (localStorage.getItem('featuresDownloadhistory') !== 'true' && inProgressDownloads.length == 0) { //If download history is disabled and all downloads are finished clear download history.
 		await chrome.downloads.erase({});
 		getDownloads();
 	}
@@ -694,7 +726,23 @@ async function updateActiveDownloads() {
 		document.getElementById('downloadingList').innerHTML = 'No active downloads.';
 	}
 	for (let I = 0; I < inProgressDownloads.length; I++) {
-			document.getElementById('downloadingList').children[I].innerHTML = `<h2 style="margin: 0;">Downloading...</h2> <h3 style="margin: 0;">${Math.round((inProgressDownloads[I].bytesReceived / inProgressDownloads[I].fileSize) * 100)}%</h3> <h3 style="margin: 0;">${inProgressDownloads[I].filename.split("\\").pop()}</h3>`;
+		const downloadItem = document.getElementById('downloadingList').children[I];
+		downloadItem.innerHTML = '';
+		
+		let statusTitle = document.createElement('h2');
+		statusTitle.innerText = 'Downloading...';
+		statusTitle.style.margin = '0px';
+		downloadItem.appendChild(statusTitle);
+		
+		let progress = document.createElement('h3');
+		progress.innerText = Math.round((inProgressDownloads[I].bytesReceived / inProgressDownloads[I].fileSize) * 100) + '%';
+		progress.style.margin = '0px';
+		downloadItem.appendChild(progress);
+		
+		let filename = document.createElement('h3');
+		filename.innerText = inProgressDownloads[I].filename.split("\\").pop();
+		filename.style.margin = '0px';
+		downloadItem.appendChild(filename);
 	}
 }
 
@@ -710,10 +758,16 @@ function ShowFileIfExists(filePath) {
 	nw.Shell.showItemInFolder(filePath);
 }
 
-function clearDownloads () {
+async function clearDownloadHistory () {
+	let inProgressDownloads = await chrome.downloads.search({state: "in_progress", orderBy: ["-startTime"]});
+	if (inProgressDownloads.length !== 0) {
+		if (!confirm('This will stop all active downloads, are you sure you want to clear the download history?')) {
+			return;
+		}
+	}
 	chrome.downloads.erase({}); //Erase all downloads
 	getDownloads(); //Update UI
-	updateActiveDownloads(); //So you dont have to wait for the next update to see the active downloads
+	updateActiveDownloads(); //So you don't have to wait for the next update to see the active downloads
 }
 
 function updateFeatures() {
@@ -800,7 +854,7 @@ function createBookmark() {
 			return;
 		}
 		if (bookmarkName.length > 16) {
-			alert('Bookmark name cannot be more than 16 characters.');
+			alert('Bookmark name cannot exceed 16 characters.');
 			return;
 		}
 		const bookmarkURL = prompt('Bookmark URL:', page.children[currentTab-1].src);
@@ -815,10 +869,10 @@ function createBookmark() {
 	toggleBookmarksMenu();
 }
  function updateBookmarks() {
-	 bookmarksMenu.innerHTML = '<button id="createBookmarkButton" class="bookmark" onclick="createBookmark();">Create bookmark</button>';
+	 bookmarksMenu.innerHTML = '<button title="Create a new bookmark." id="createBookmarkButton" class="bookmark" onclick="createBookmark();">Create bookmark</button>';
 	 for (let I = 0; bookmarks.length > I; I++) {
 		let newBookmark = document.createElement('button');
-		newBookmark.title = 'Right-click to remove';
+		newBookmark.title = 'Go to bookmark (right-click to remove)';
 		newBookmark.textContent = bookmarks[I].name;
 		newBookmark.onclick = () => {if (tabs.length == 0) { newTab(bookmarks[I].URL); } else { page.children[currentTab-1].src = bookmarks[I].URL; }; toggleBookmarksMenu(); };
 		newBookmark.classList.add('bookmark');
@@ -844,17 +898,18 @@ win.window.addEventListener("keydown", (event) => { //Put all the hotkeys here.
 		}
 	}
 });
-let newKioskPWD;
+let newKioskPWD = null; //Cleared in settingsGet(): newKioskPWD = null;
 function editKioskPassword() {
 	let newPassword = prompt('Enter password to open settings from kiosk mode:');
 	if (newPassword == null){
 		return false;
 	}
 	if (newPassword == '') {
-		alert('Password cannot be empty, operation canceled.');
+		alert('Password cannot be empty. operation canceled.');
 		return false;
 	}
 	newKioskPWD = newPassword;
+	document.getElementById('settingsEditKioskPWDbuton').style.display = 'inline';
 	return true;
 }
 
@@ -876,17 +931,36 @@ function updateWindowTitle() {
 function handleVersion() {
 	document.getElementById('settingsVersionText').textContent = 'Version ' + nw.App.manifest.version;
 	if (localStorage.getItem('browserVer') == null && localStorage.getItem('startURL') == null) {
-		localStorage.setItem('browserVer', nw.App.manifest.version);
+		localStorage.setItem('browserVer', nw.App.manifest.version); //browserVer is the version of the browser that first created the data not the current browser version!
 	} else {
-		if (localStorage.getItem('browserVer') !== nw.App.manifest.version) {
-			if (confirm("Data from an older or newer version was detected. Do you want to reset the browser? If you don't, there may be issues.")) {
+		if (localStorage.getItem('browserVer') !== nw.App.manifest.version && localStorage.getItem('DontWarnDiffrentDataVersion') !== nw.App.manifest.version) {
+			if (confirm("Data from a different browser version was detected. Do you want to reset the browser? If you don't, there may be issues.")) {
 				resetBrowser();
 			} else {
-				localStorage.setItem('browserVer', nw.App.manifest.version); //So it won't ask again.
+				localStorage.setItem('DontWarnDiffrentDataVersion', nw.App.manifest.version); //So it won't ask again.
 			}
 		}
 	}
 };
+
+function showSavedKioskPassword() {
+	let message = '';
+	if (localStorage.getItem('kioskPassword') !== null) {
+		message = message + 'Currently active kiosk password:\n' + localStorage.getItem('kioskPassword');
+	}
+
+	if (localStorage.getItem('kioskPassword') !== null && newKioskPWD !== null) {
+		message = message + '\n';
+	}
+
+	if (newKioskPWD !== null) {
+		message = message + 'Kiosk password to be applied:\n' + newKioskPWD;
+	}
+	if (newKioskPWD == null && localStorage.getItem('kioskPassword') == null) {
+		message = 'No kiosk password is set.';
+	}
+	alert(message);
+}
 
 win.on('close', async function () {
 	if (localStorage.getItem('featuresKioskmode') == 'true') {
@@ -894,7 +968,7 @@ win.on('close', async function () {
 	}
 	const inProgressDownloads = await chrome.downloads.search({state: "in_progress", orderBy: ["-startTime"]});
 	if (inProgressDownloads.length !== 0) { //Warning if downloads are active because the default one doesn't work when window close is hooked.
-		if (!confirm('Close this window? Downloads are still active.')) {
+		if (!confirm('Downloads are still in progress. Are you sure you want to close this window?')) {
 			return;
 		}
 	}

@@ -1,6 +1,6 @@
 {
     "name": "Soep Browser",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "main": "browser/index.html",
     "window": {
         "icon": "browser/icons/app.png",
